@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - dws202-network
+
+  ignite:
+    image: apacheignite/ignite:latest
+    container_name: ignite
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - ignite_data:/storage
+    ports:
+      - "${IGNITE_CLIENT_PORT}:10800"
+      - "${IGNITE_WEB_PORT}:8080"
+    networks:
+      - dws202-network
+
+  script:
+    build: .
+    container_name: script
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - ignite
+    networks:
+      - dws202-network
+
+networks:
+  dws202-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+  ignite_data:
