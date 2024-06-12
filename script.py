@@ -1,65 +1,54 @@
 import os
+import time
 from dotenv import load_dotenv
 import redis
-from pyignite import Client
-import random
-import datetime
+import pandas as pd
+import hashjoin_v1, hashjoin_v2
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Setup connection to Redis db
-def setup_redis_connection(host, port):
-    redis_client = redis.Redis(host=host, port=port)
-    return redis_client
+# Populate redis_db1 instance with df containing users entries  
+def populate_user_data(redis_conn, df):
+    for index, row in df.iterrows():
+        timestamp_str = str(row['registration_timestamp'])
+        redis_conn.hset(row['user_id'], mapping={
+                                            'name': row['name'],
+                                            'email': row['email'],
+                                            'registration_timestamp': timestamp_str
+                                        })
 
-# Setup connection to Ignite db
-def setup_ignite_connection(host, port):
-    client = Client()
-    client.connect(str(host), int(port))
-    return client
 
-# Function to populate Redis with random data
-def populate_redis(r, num_entries=100):
-    for i in range(num_entries):
-        value = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ', k=5))
-        timestamp = datetime.datetime.now().isoformat()
-        r.hmset(f'table1:{i}', {'value': value, 'timestamp': timestamp})
-    
-    for i in range(num_entries):
-        value = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ', k=5))
-        table1_id = random.randint(0, num_entries - 1)
-        timestamp = datetime.datetime.now().isoformat()
-        r.hmset(f'table2:{i}', {'table1_id': table1_id, 'value': value, 'timestamp': timestamp})
+# Populate redis_db2 instance with df containing orders entries
+def populate_order_data(redis_conn, df):
+    for index, row in df.iterrows():
+        timestamp_str = str(row['order_timestamp'])
+        redis_conn.hset(row['order_id'], mapping={
+                                            'user_id': row['user_id'],
+                                            'product': row['product'],
+                                            'order_timestamp': timestamp_str
+                                        }) 
 
-# Function to populate Ignite with random data
-def populate_ignite(client, num_entries=100):
-    client.sql('CREATE TABLE IF NOT EXISTS table1 (id INT PRIMARY KEY, value VARCHAR, timestamp TIMESTAMP)')
-    client.sql('CREATE TABLE IF NOT EXISTS table2 (id INT PRIMARY KEY, table1_id INT, value VARCHAR, timestamp TIMESTAMP)')
-
-    for i in range(num_entries):
-        value = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ', k=5))
-        timestamp = datetime.datetime.now()
-        client.sql('INSERT INTO table1 (id, value, timestamp) VALUES (?, ?, ?)', query_args=[i, value, timestamp])
-    
-    for i in range(num_entries):
-        value = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ', k=5))
-        table1_id = random.randint(0, num_entries - 1)
-        timestamp = datetime.datetime.now()
-        client.sql('INSERT INTO table2 (id, table1_id, value, timestamp) VALUES (?, ?, ?, ?)', query_args=[i, table1_id, value, timestamp])
 
 def main():
-    redis_conn = setup_redis_connection(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))
-    ignite_conn = setup_ignite_connection(os.getenv('IGNITE_CLIENT_HOST'), os.getenv('IGNITE_CLIENT_PORT'))
+    # setup connections with 2 redis db
+    redis_conn1 = redis.Redis(os.getenv('REDIS_HOST1'), os.getenv('REDIS_DEFAULT_INTERNAL_PORT'))
+    redis_conn2 = redis.Redis(os.getenv('REDIS_HOST2'), os.getenv('REDIS_DEFAULT_INTERNAL_PORT'))
 
-    # # Populate Redis
-    # populate_redis(redis_conn)
+    # read the csv records (tables) in df 
+    df_users = pd.read_csv(os.getenv('USERS_IN_DOCKER_PATH'))
+    df_orders = pd.read_csv(os.getenv('ORDERS_IN_DOCKER_PATH'))
     
-    # # Populate Ignite
-    # populate_ignite(ignite_conn)
+    # populate both redis instances with corresponding data
+    populate_user_data(redis_conn1, df_users)
+    populate_order_data(redis_conn2, df_orders)
 
-    # Perform joins and other operations as needed
-    # (To be implemented according to your requirements)
+    # Perform the v1 pipelined hash join
+    start_time = time.time()
+    hashjoin_v1.pipelined_hash_join(redis_conn1, redis_conn2)
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"The execution time of hash join v1 is {execution_time} seconds")
+
 
 if __name__ == '__main__':
     main()

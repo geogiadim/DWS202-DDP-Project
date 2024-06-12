@@ -10,7 +10,10 @@ RUN pip install -r requirements.txt
 
 # Copy the script and .env file into the container
 COPY script.py .
+COPY hashjoin_v1.py .
+COPY hashjoin_v2.py .
 COPY .env .
+COPY dataset /app/dataset
 
 # Run the script
 CMD ["python", "script.py"]
