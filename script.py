@@ -49,6 +49,13 @@ def main():
     execution_time = end_time - start_time
     print(f"The execution time of hash join v1 is {execution_time} seconds")
 
+    # Perform the v2 pipelined hash join
+    start_time = time.time()
+    hashjoin_v2.pipelined_hash_join(redis_conn1, redis_conn2)
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"The execution time hash join v2 is {execution_time} seconds")
+
 
 if __name__ == '__main__':
     main()
