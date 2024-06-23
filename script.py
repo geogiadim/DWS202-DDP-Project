@@ -42,13 +42,13 @@ def main():
     redis_conn1 = redis.Redis(os.getenv('REDIS_HOST1'), os.getenv('REDIS_DEFAULT_INTERNAL_PORT'))
     redis_conn2 = redis.Redis(os.getenv('REDIS_HOST2'), os.getenv('REDIS_DEFAULT_INTERNAL_PORT'))
 
-    # # read the csv records (tables) in df 
-    # df_users = pd.read_csv(os.getenv('USERS_IN_DOCKER_PATH'))
-    # df_orders = pd.read_csv(os.getenv('ORDERS_IN_DOCKER_PATH'))
+    # read the csv records (tables) in df 
+    df_users = pd.read_csv(os.getenv('USERS_IN_DOCKER_PATH'))
+    df_orders = pd.read_csv(os.getenv('ORDERS_IN_DOCKER_PATH'))
     
-    # # populate both redis instances with corresponding data
-    # populate_user_data(redis_conn1, df_users)
-    # populate_order_data(redis_conn2, df_orders)
+    # populate both redis instances with corresponding data
+    populate_user_data(redis_conn1, df_users)
+    populate_order_data(redis_conn2, df_orders)
 
     # fetch all data from each redis db so as to avoid multiple calls in redis which is time-consuming process
     all_data_users = fetch_all_data(redis_conn1)

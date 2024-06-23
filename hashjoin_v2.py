@@ -38,8 +38,7 @@ def pipelined_hash_join(data_users, data_orders):
         
     for order_key in order_keys:
         order_data = data_orders.get(order_key)
-        if order_data:
-            probe_and_filter_users(data_users, order_key, order_data, counter)
+        probe_and_filter_users(data_users, order_key, order_data, counter)
 
     return counter 
 
