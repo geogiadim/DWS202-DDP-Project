@@ -12,6 +12,7 @@ RUN pip install -r requirements.txt
 COPY script.py .
 COPY hashjoin_v1.py .
 COPY hashjoin_v2.py .
+COPY semi_join.py .
 COPY .env .
 COPY dataset /app/dataset
 

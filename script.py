@@ -3,7 +3,7 @@ import time
 from dotenv import load_dotenv
 import redis
 import pandas as pd
-import hashjoin_v1, hashjoin_v2
+import hashjoin_v1, hashjoin_v2, semi_join
 
 load_dotenv()
 
@@ -42,19 +42,26 @@ def main():
     populate_user_data(redis_conn1, df_users)
     populate_order_data(redis_conn2, df_orders)
 
-    # Perform the v1 pipelined hash join
+    # Perform the v1 pipelined hash join (hash the small relation)
     start_time = time.time()
     hashjoin_v1.pipelined_hash_join(redis_conn1, redis_conn2)
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"The execution time of hash join v1 is {execution_time} seconds")
 
-    # Perform the v2 pipelined hash join
+    # Perform the v2 pipelined hash join (hash the big relation)
     start_time = time.time()
     hashjoin_v2.pipelined_hash_join(redis_conn1, redis_conn2)
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"The execution time hash join v2 is {execution_time} seconds")
+
+    # Perform semi-join to retrieve users without any order
+    start_time = time.time()
+    semi_join.semi_join_users_without_orders(redis_conn1, redis_conn2)
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"The execution time semi-join is {execution_time} seconds")
 
 
 if __name__ == '__main__':
