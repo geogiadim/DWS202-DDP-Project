@@ -10,6 +10,7 @@ RUN pip install -r requirements.txt
 
 # Copy the script and .env file into the container
 COPY script.py .
+COPY data_generator.py .
 COPY hashjoin_v1.py .
 COPY hashjoin_v2.py .
 COPY semi_join.py .

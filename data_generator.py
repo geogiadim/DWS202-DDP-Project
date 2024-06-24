@@ -1,10 +1,6 @@
 import csv
 import random
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
 
 # Function to generate random orders for each user
 def generate_orders(user_id):
@@ -22,30 +18,31 @@ def generate_orders(user_id):
     return orders
 
 
-# Generate users data
-users_data = []
-for i in range(int(os.getenv('NUM_OF_USERS'))):
-    user_id = f"user_{i+1}"
-    name = f"User {i+1}"
-    email = f"user{i+1}@example.com"
-    registration_timestamp = f"2024-06-01T00:00:00"
-    users_data.append([user_id, name, email, registration_timestamp])
+def executePipeline(num_of_users):
+    # Generate users data
+    users_data = []
+    for i in range(num_of_users):
+        user_id = f"user_{i+1}"
+        name = f"User {i+1}"
+        email = f"user{i+1}@example.com"
+        registration_timestamp = f"2024-06-01T00:00:00"
+        users_data.append([user_id, name, email, registration_timestamp])
 
-# Write users data to CSV
-users_csv_file = 'dataset/users.csv'
-with open(users_csv_file, mode='w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(['user_id', 'name', 'email', 'registration_timestamp'])
-    writer.writerows(users_data)
+    # Write users data to CSV
+    users_csv_file = 'dataset/users.csv'
+    with open(users_csv_file, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['user_id', 'name', 'email', 'registration_timestamp'])
+        writer.writerows(users_data)
 
-# Write orders data to CSV
-orders_csv_file = 'dataset/orders.csv'
-with open(orders_csv_file, mode='w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(['order_id', 'user_id', 'product', 'order_timestamp'])
-    for user_data in users_data:
-        user_id = user_data[0]  # user_id is the first element in the user_data list
-        orders = generate_orders(user_id)
-        writer.writerows(orders)
+    # Write orders data to CSV
+    orders_csv_file = 'dataset/orders.csv'
+    with open(orders_csv_file, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['order_id', 'user_id', 'product', 'order_timestamp'])
+        for user_data in users_data:
+            user_id = user_data[0]  # user_id is the first element in the user_data list
+            orders = generate_orders(user_id)
+            writer.writerows(orders)
 
-print(f"CSV files '{users_csv_file}' and '{orders_csv_file}' generated successfully.")
+    print(f"CSV files '{users_csv_file}' and '{orders_csv_file}' generated successfully.")
