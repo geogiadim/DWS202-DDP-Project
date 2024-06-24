@@ -46,7 +46,7 @@ def semi_join_filter_users(data_users, data_orders):
     counter = {'hashjoin_counter': 0, 'semi-join_counter': 0, 'hashjoin_comparison_counter': 0, 'semi-join_comparison_counter': 0}
     user_keys = list(data_users.keys())
     order_keys = list(data_orders.keys())
-
+    print('### Results of combination of semi + hashjoin: ')
     for user_key in user_keys:
         user_data = data_users.get(user_key)  # get all data from redis_db1 hashmap for given user key
         if not check_user_has_orders(data_orders, order_keys, user_key, counter):

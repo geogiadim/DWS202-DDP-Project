@@ -31,7 +31,7 @@ def pipelined_hash_join(data_users, data_orders):
     counter = {'join_counter': 0, 'comparison_counter': 0}
     order_keys = list(data_orders.keys())    
     user_keys = list(data_users.keys())
-
+    print('### Results of hashjoin v2: ')
     for order_key in order_keys:
         order_data = data_orders.get(order_key)
         probe_and_filter_users(data_users, user_keys, order_key, order_data, counter)

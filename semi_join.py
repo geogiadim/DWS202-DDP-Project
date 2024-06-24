@@ -17,7 +17,7 @@ def semi_join_users_without_orders(data_users, data_orders):
     counter = {'join_counter': 0, 'comparison_counter': 0}
     user_keys = list(data_users.keys())
     order_keys = list(data_orders.keys())
-
+    print('### Results of semi-join: ')
     for user_key in user_keys:
         user_data = data_users.get(user_key)  # get all data from redis_db1 hashmap for given user key
         if user_data:
