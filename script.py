@@ -32,7 +32,7 @@ def populate_order_data(redis_conn, df):
 def fetch_all_data(redis_conn):
     all_data = {}
     for key in redis_conn.scan_iter("*"):  # Fetch all keys
-        data = redis_conn.hgetall(key)  # Assuming data is stored in hashes
+        data = redis_conn.hgetall(key)  #  Data is stored in hashes
         all_data[key.decode('utf-8')] = {k.decode('utf-8'): v.decode('utf-8') for k, v in data.items()}
     return all_data
 
