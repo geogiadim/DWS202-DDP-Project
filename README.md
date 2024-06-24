@@ -12,9 +12,11 @@ Project for DWS MSc Program's course named "Distributed Data Processing" (DWS202
 7. [ENV file notes](#env-file-notes)
 
 ## About
+
 This Docker project simulates a distributed environment by serving two separate Redis database instances. It creates two datasets and populates one in the first Redis instance and the second in the second instance. It implements Hash Join and Semi Join functions outside of the databases and provides a comparison between the different implementations. By leveraging Docker, this project ensures a consistent and isolated setup for running the Redis instances and executing the join operations. This setup allows for a practical exploration of distributed data processing techniques and the performance implications of different join strategies in a simulated environment.
 
 ## Dataset Description
+
 The dataset consists of two CSV files:
 1. **Users**: Contains columns `user_id`, `name`, `email`, `registration_timestamp`. The `user_id` column serves as the primary key.
 
@@ -22,6 +24,7 @@ The dataset consists of two CSV files:
 
 
 ## Python Files Description
+
 - **scripts.py**: This file serves as the main function that orchestrates all processes within the project.
 
 - **hashjoin_v1.py**: Implements the Hash Join algorithm by hashing the users relation and seeking for joins in the orders relation. It joins the corresponding user and order tuples and prints the result.
@@ -58,11 +61,13 @@ The dataset consists of two CSV files:
     ```
 
 ## Usage
+
 - The project scripts will automatically handle the dataset creation, loading into Redis, and executing the join operations.
 
 - Check the console output for the results of the join operations and the comparison between different implementations.
 
 ## ENV File Notes
+
 - **DO NOT CHANGE** the following values:
     ```plaintext
     REDIS_HOST1=redis_db1
