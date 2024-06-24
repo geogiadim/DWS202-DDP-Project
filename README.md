@@ -2,14 +2,38 @@
 
 Project for DWS MSc Program's course named "Distributed Data Processing" (DWS202).
 
+# Table of Contents
+
+1. [About](#about)
+2. [Dataset Description](#dataset-description)
+3. [Python Files Description](#python-files-description)
+4. [Getting Started](#getting-started)
+6. [Usage](#usage)
+7. [ENV file notes](#env-file-notes)
+
 ## About
 This Docker project simulates a distributed environment by serving two separate Redis database instances. It creates two datasets and populates one in the first Redis instance and the second in the second instance. It implements Hash Join and Semi Join functions outside of the databases and provides a comparison between the different implementations. By leveraging Docker, this project ensures a consistent and isolated setup for running the Redis instances and executing the join operations. This setup allows for a practical exploration of distributed data processing techniques and the performance implications of different join strategies in a simulated environment.
 
-## Dataset
+## Dataset Description
 The dataset consists of two CSV files:
 1. **Users**: Contains columns `user_id`, `name`, `email`, `registration_timestamp`. The `user_id` column serves as the primary key.
 
 2. **Orders**: Contains columns `order_id`, `user_id`, `product`, `order_timestamp`. The `user_id` column serves as a foreign key referencing the user_id in the Users dataset.
+
+
+## Python Files Description
+- **scripts.py**: This file serves as the main function that orchestrates all processes within the project.
+
+- **hashjoin_v1.py**: Implements the Hash Join algorithm by hashing the users relation and seeking for joins in the orders relation. It joins the corresponding user and order tuples and prints the result.
+
+- **hashjoin_v2.py**: Implements an alternative Hash Join approach by hashing the orders relation and seeking for joins in the users relation. It joins the corresponding user and order tuples and prints the result.
+
+- **semi_join.py**: Implements the Semi Join algorithm by hashing the users relation and seeking for joins in the orders relation. If a join exists for a user, it stops and continues to the next one. It prints only users with no orders.
+
+- **combo_semi_hash_v1.py**: Combines Semi Join and Hash Join strategies. For each user, it performs a Semi Join to check if the user has related orders. If true, it then performs Hash Join (using `hashjoin_v1.py`) to join the corresponding user and order tuples and prints the result.
+
+**Note**: All implementations utilize pipelining, which means that whenever a join is found, it immediately prints the joined tuples.
+
 
 ## Getting Started
 
@@ -38,7 +62,7 @@ The dataset consists of two CSV files:
 
 - Check the console output for the results of the join operations and the comparison between different implementations.
 
-## ENV file notes
+## ENV File Notes
 - **DO NOT CHANGE** the following values:
     ```plaintext
     REDIS_HOST1=redis_db1
