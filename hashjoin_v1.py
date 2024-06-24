@@ -28,15 +28,10 @@ def probe_and_filter_orders(data_orders, order_keys, user_id, user_data, counter
 
 
 # Pipelined Hash Join
-def pipelined_hash_join(data_users, data_orders, user_keys_param=[]):
+def pipelined_hash_join(data_users, data_orders):
     counter = {'join_counter': 0, 'comparison_counter': 0}
 
-    # this is for getting the filtered user_keys from semi-join function
-    if user_keys_param:
-        user_keys = user_keys_param
-    else:
-        user_keys = list(data_users.keys())
-
+    user_keys = list(data_users.keys())
     order_keys = list(data_orders.keys()) 
     print('### Results of hashjoin v1: ')
     for user_key in user_keys:
