@@ -1,6 +1,10 @@
 import csv
 import random
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Function to generate random orders for each user
 def generate_orders(user_id):
@@ -20,7 +24,7 @@ def generate_orders(user_id):
 
 # Generate users data
 users_data = []
-for i in range(100):
+for i in range(int(os.getenv('NUM_OF_USERS'))):
     user_id = f"user_{i+1}"
     name = f"User {i+1}"
     email = f"user{i+1}@example.com"
@@ -28,14 +32,14 @@ for i in range(100):
     users_data.append([user_id, name, email, registration_timestamp])
 
 # Write users data to CSV
-users_csv_file = 'dataset/users100.csv'
+users_csv_file = 'dataset/users.csv'
 with open(users_csv_file, mode='w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(['user_id', 'name', 'email', 'registration_timestamp'])
     writer.writerows(users_data)
 
 # Write orders data to CSV
-orders_csv_file = 'dataset/orders100.csv'
+orders_csv_file = 'dataset/orders.csv'
 with open(orders_csv_file, mode='w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(['order_id', 'user_id', 'product', 'order_timestamp'])

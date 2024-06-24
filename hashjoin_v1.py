@@ -2,15 +2,12 @@ from datetime import datetime, timedelta
 
 # Function to check and filter the orders
 # data_orders: data of the second relation
+# order_keys: all keys of the second relation
 # user_id: key of entry from the first relation
 # user_data: value for given key from the first relation
 # counter: dictionary with counters just for logging purposes
-def probe_and_filter_orders(data_orders, user_id, user_data, counter):
-    order_keys = []
-    for order_key, order_data in data_orders.items():
-        order_keys.append(order_key)
-
-    for order_key in order_keys:
+def probe_and_filter_orders(data_orders, order_keys, user_id, user_data, counter):
+    for order_key in list(order_keys):
         counter['comparison_counter'] += 1
         order_data = data_orders.get(order_key)  # get all data for given order key
         if order_data and order_data['user_id'] == user_id:  # check if order_data contain user_id
@@ -27,21 +24,24 @@ def probe_and_filter_orders(data_orders, user_id, user_data, counter):
                     'product': order_data['product'],
                     'order_timestamp': order_data['order_timestamp']
                 })
+                order_keys.remove(order_key)  # Remove the key from the list since each order can be assigned to only one user
 
 
 # Pipelined Hash Join
 def pipelined_hash_join(data_users, data_orders, user_keys_param=[]):
     counter = {'join_counter': 0, 'comparison_counter': 0}
-    user_keys = []
+
+    # this is for getting the filtered user_keys from semi-join function
     if user_keys_param:
         user_keys = user_keys_param
     else:
-        for user_key, user_data in data_users.items():
-            user_keys.append(user_key)
+        user_keys = list(data_users.keys())
+
+    order_keys = list(data_orders.keys()) 
         
     for user_key in user_keys:
         user_data = data_users.get(user_key)
-        probe_and_filter_orders(data_orders, user_key, user_data, counter)
+        probe_and_filter_orders(data_orders, order_keys, user_key, user_data, counter)
     
     return counter 
 

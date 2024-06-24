@@ -13,6 +13,7 @@ COPY script.py .
 COPY hashjoin_v1.py .
 COPY hashjoin_v2.py .
 COPY semi_join.py .
+COPY combo_semi_hash_v1.py .
 
 COPY .env .
 COPY dataset /app/dataset

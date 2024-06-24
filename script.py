@@ -3,7 +3,7 @@ import time
 from dotenv import load_dotenv
 import redis
 import pandas as pd
-import hashjoin_v1, hashjoin_v2, semi_join
+import hashjoin_v1, hashjoin_v2, semi_join, combo_semi_hash_v1
 
 load_dotenv()
 
@@ -42,13 +42,13 @@ def main():
     redis_conn1 = redis.Redis(os.getenv('REDIS_HOST1'), os.getenv('REDIS_DEFAULT_INTERNAL_PORT'))
     redis_conn2 = redis.Redis(os.getenv('REDIS_HOST2'), os.getenv('REDIS_DEFAULT_INTERNAL_PORT'))
 
-    # read the csv records (tables) in df 
-    df_users = pd.read_csv(os.getenv('USERS_IN_DOCKER_PATH'))
-    df_orders = pd.read_csv(os.getenv('ORDERS_IN_DOCKER_PATH'))
+    # # read the csv records (tables) in df 
+    # df_users = pd.read_csv(os.getenv('USERS_IN_DOCKER_PATH'))
+    # df_orders = pd.read_csv(os.getenv('ORDERS_IN_DOCKER_PATH'))
     
-    # populate both redis instances with corresponding data
-    populate_user_data(redis_conn1, df_users)
-    populate_order_data(redis_conn2, df_orders)
+    # # populate both redis instances with corresponding data
+    # populate_user_data(redis_conn1, df_users)
+    # populate_order_data(redis_conn2, df_orders)
 
     # fetch all data from each redis db so as to avoid multiple calls in redis which is time-consuming process
     all_data_users = fetch_all_data(redis_conn1)
@@ -68,31 +68,36 @@ def main():
 
     # Perform semi-join to retrieve users without any order
     start_time = time.time()
-    counter_semi, users_with_orders = semi_join.semi_join_users_without_orders(all_data_users, all_data_orders)
+    counter_semi = semi_join.semi_join_users_without_orders(all_data_users, all_data_orders)
     end_time = time.time()
     execution_time_semi = end_time - start_time
-    counter_hash_combo = hashjoin_v1.pipelined_hash_join(all_data_users, all_data_orders, users_with_orders)
+
+    # Perform semi-join to check if uses has any order. if True then perform hashjoin_v1 to get all the orders of the user
+    start_time = time.time()
+    counter_combo = combo_semi_hash_v1.semi_join_filter_users(all_data_users, all_data_orders)
     end_time = time.time()
     execution_time_combo = end_time - start_time
     
+    # results
     print('####################################')
     print(f"The execution time of hash join v1 is {execution_time_v1} seconds")
     print(f"Total comparisons performed in hash join v1: {counter_v1['comparison_counter']}")
-    print(f"Total joins of hash join v1: {counter_v1['join_counter']}")
+    print(f"Total hash joins v1: {counter_v1['join_counter']}")
     print('####################################')
     print(f"The execution time of hash join v2 is {execution_time_v2} seconds")
     print(f"Total comparisons performed in hash join v2: {counter_v2['comparison_counter']}")
-    print(f"Total joins of hash join v2: {counter_v2['join_counter']}")
+    print(f"Total hash joins v2: {counter_v2['join_counter']}")
     print('####################################')
     print(f"The execution time semi-join is {execution_time_semi} seconds")
     print(f"Total comparisons performed in semi join: {counter_semi['comparison_counter']}")
-    print(f"Total joins of semi join: {counter_semi['join_counter']}")
-    print(len(users_with_orders))
+    print(f"Total semi joins: {counter_semi['join_counter']}")
     print('####################################')
     print(f"The execution time of combo is {execution_time_combo} seconds")
-    print(f"Total comparisons performed in hash join v1 filtered with semi join: {counter_hash_combo['comparison_counter']}")
-    print(f"Total comparisons performed in hash join combo: {counter_hash_combo['comparison_counter'] + counter_semi['comparison_counter']}")
-    print(f"Total joins of hash join combo: {counter_hash_combo['join_counter']}")
+    print(f"Total comparisons performed in combo (semi): {counter_combo['semi-join_comparison_counter']}")
+    print(f"Total comparisons performed in combo (hash): {counter_combo['hashjoin_comparison_counter']}")
+    print(f"Total comparisons performed in combo (semi + hash): {counter_combo['hashjoin_comparison_counter'] + counter_combo['semi-join_comparison_counter']}")
+    print(f"Total hash joins in combo: {counter_combo['hashjoin_counter']}")
+    print(f"Total semi joins in combo: {counter_combo['semi-join_counter']}")
     print('####################################')
 
 

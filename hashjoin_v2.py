@@ -2,14 +2,11 @@ from datetime import datetime, timedelta
 
 # Function to check and filter the users
 # data_users: data of the first relation
+# user_keys: all keys of the first relation
 # order_key: key of entry from the second relation
 # order_data: value for given key from the second relation
 # counter: dictionary with counters just for logging purposes
-def probe_and_filter_users(data_users, order_key, order_data, counter):
-    user_keys = []
-    for user_key, user_data in data_users.items():
-        user_keys.append(user_key)
-
+def probe_and_filter_users(data_users, user_keys, order_key, order_data, counter):
     for user_key in user_keys:
         counter['comparison_counter'] += 1
         user_data = data_users.get(user_key)  # get all data for given user key
@@ -32,13 +29,12 @@ def probe_and_filter_users(data_users, order_key, order_data, counter):
 # Pipelined Hash Join
 def pipelined_hash_join(data_users, data_orders):
     counter = {'join_counter': 0, 'comparison_counter': 0}
-    order_keys = []
-    for order_key, order_data in data_orders.items():
-        order_keys.append(order_key)
-        
+    order_keys = list(data_orders.keys())    
+    user_keys = list(data_users.keys())
+
     for order_key in order_keys:
         order_data = data_orders.get(order_key)
-        probe_and_filter_users(data_users, order_key, order_data, counter)
+        probe_and_filter_users(data_users, user_keys, order_key, order_data, counter)
 
     return counter 
 
